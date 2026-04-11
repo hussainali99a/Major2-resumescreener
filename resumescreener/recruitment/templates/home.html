@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="bg-gray-900 text-white">
+  <div class="max-w-7xl mx-auto px-6 py-20 flex flex-col md:flex-row items-center">
+    
+    <!-- Left Content -->
+    <div class="md:w-1/2 space-y-6">
+      <h1 class="text-4xl md:text-5xl font-bold leading-tight">
+        AI-Powered Hiring Made Simple
+      </h1>
+      <p class="text-lg text-gray-300">
+        Automatically shortlist candidates by matching resumes with job descriptions using intelligent AI.
+      </p>
+
+      <div class="flex space-x-4">
+        <a href="{% url 'signup' %}" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold">
+          Get Started
+        </a>
+        <a href="{% url 'login' %}" class="border border-gray-400 hover:bg-gray-800 px-6 py-3 rounded-lg">
+          Login
+        </a>
+      </div>
+    </div>
+
+    <!-- Right Image -->
+    <div class="md:w-1/2 mt-10 md:mt-0">
+      <img src="https://illustrations.popsy.co/gray/work-from-home.svg" alt="HR AI" class="w-full">
+    </div>
+
+  </div>
+</section>
+
+
+<!-- FEATURES SECTION -->
+<section class="bg-white py-16">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    
+    <h2 class="text-3xl font-bold mb-12">Why Choose Our HR AI Agent?</h2>
+
+    <div class="grid md:grid-cols-3 gap-8">
+
+      <!-- Feature 1 -->
+      <div class="p-6 shadow-lg rounded-xl hover:shadow-xl transition">
+        <div class="text-blue-600 text-4xl mb-4">📄</div>
+        <h3 class="text-xl font-semibold mb-2">Resume Screening</h3>
+        <p class="text-gray-600">
+          Automatically parse and analyze resumes to extract key skills, experience, and qualifications.
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="p-6 shadow-lg rounded-xl hover:shadow-xl transition">
+        <div class="text-green-600 text-4xl mb-4">🎯</div>
+        <h3 class="text-xl font-semibold mb-2">Job Matching</h3>
+        <p class="text-gray-600">
+          Match candidates with job descriptions using AI-based similarity scoring.
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="p-6 shadow-lg rounded-xl hover:shadow-xl transition">
+        <div class="text-purple-600 text-4xl mb-4">📊</div>
+        <h3 class="text-xl font-semibold mb-2">Analytics Dashboard</h3>
+        <p class="text-gray-600">
+          Get insights into hiring trends, candidate performance, and recruitment efficiency.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- HOW IT WORKS -->
+<section class="bg-gray-100 py-16">
+  <div class="max-w-7xl mx-auto px-6 text-center">
+    
+    <h2 class="text-3xl font-bold mb-12">How It Works</h2>
+
+    <div class="grid md:grid-cols-4 gap-6">
+
+      <div class="p-6 bg-white rounded-lg shadow">
+        <h3 class="font-bold text-lg">1. Upload Resume</h3>
+        <p class="text-gray-600 mt-2">Upload candidate resumes in PDF format.</p>
+      </div>
+
+      <div class="p-6 bg-white rounded-lg shadow">
+        <h3 class="font-bold text-lg">2. Add Job Description</h3>
+        <p class="text-gray-600 mt-2">Provide job requirements and skills.</p>
+      </div>
+
+      <div class="p-6 bg-white rounded-lg shadow">
+        <h3 class="font-bold text-lg">3. AI Analysis</h3>
+        <p class="text-gray-600 mt-2">System compares resumes with job roles.</p>
+      </div>
+
+      <div class="p-6 bg-white rounded-lg shadow">
+        <h3 class="font-bold text-lg">4. Shortlist</h3>
+        <p class="text-gray-600 mt-2">Get ranked candidates instantly.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- CTA SECTION -->
+<section class="bg-blue-600 text-white py-16 text-center">
+  <div class="max-w-4xl mx-auto px-6">
+    
+    <h2 class="text-3xl font-bold mb-4">
+      Start Hiring Smarter Today
+    </h2>
+    <p class="mb-6 text-lg">
+      Save time, reduce bias, and hire the best talent faster with AI.
+    </p>
+
+    <a href="{% url 'signup' %}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-200">
+      Create Free Account
+    </a>
+
+  </div>
+</section>
+
+{% endblock %}
