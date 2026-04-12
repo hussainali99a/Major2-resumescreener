@@ -4,7 +4,8 @@ from recruiter.models import Job, Candidate, User
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
-
+from recruiter.utils import extract_text_from_resume
+import hashlib
 
 # ----------------------
 # DASHBOARD
@@ -68,38 +69,64 @@ def jobs_view(request):
         'query': query
     })
     
-    
+
 @login_required
-def candidates_view(request):
-
-    job_id = request.GET.get('job_id')
-
+def candidates_view(request, job_id=None):
     jobs = Job.objects.filter(user=request.user)
-
-    candidates = Candidate.objects.filter(user=request.user)
+    candidates = Candidate.objects.none()
 
     if job_id:
-        candidates = candidates.filter(job_id=job_id)
+        candidates = Candidate.objects.filter(job__user=request.user, job_id=job_id)
 
+    # 📊 Analytics
+    total_resumes = candidates.count()
+    total_jobs = jobs.count()
+    avg_per_job = total_resumes / total_jobs if total_jobs > 0 else 0
+    
+    # ================= UPLOAD =================
     if request.method == "POST":
         resume = request.FILES.get('resume')
+
+        if not resume or not job_id:
+            return redirect(f'jobs/{job_id}/candidates/')
+
+        # 🔐 hash file (avoid duplicates)
+        file_hash = hashlib.sha256(resume.read()).hexdigest()
+        resume.seek(0)
+
+        if Candidate.objects.filter(file_hash=file_hash, job_id=job_id).exists():
+            return redirect(f'jobs/{job_id}/candidates/')
+
+        # 🧠 Extract text (basic version)
+        resume_text = extract_text_from_resume(resume)  # create this
+
+        # 🧠 Dummy parsing (replace later with AI)
+        name = "Parsed Name"
+        email = "parsed@email.com"
 
         Candidate.objects.create(
             user=request.user,
             job_id=job_id,
-            name="Parsed Name",
-            email="parsed@email.com",
-            resume=resume,
-            score=75,
-            status="Screening"
+            name=name,
+            email=email,
+            resume_file=resume,
+            file_hash=file_hash,
+            resume_text=resume_text,
+            match_score=0,
+            summary="Pending AI screening",
+            status="UNDER_REVIEW"
         )
 
         return redirect(f'/hr/candidates/?job_id={job_id}')
 
+    jobs = Job.objects.filter(user=request.user)
     return render(request, 'recruiter/candidates.html', {
         'jobs': jobs,
         'candidates': candidates,
-        'selected_job': job_id
+        'selected_job': job_id,
+        'total_resumes': total_resumes,
+        'total_jobs': total_jobs,
+        'avg_per_job': round(avg_per_job, 2)
     })
 
 
@@ -125,3 +152,28 @@ def job_detail_api(request, id):
         "description": job.description,
         "created_at": job.created_at.strftime("%Y-%m-%d"),
     })
+
+@login_required
+def screen_single(request, id):
+    candidate = Candidate.objects.get(id=id)
+
+    # 🔥 Replace with LLM later
+    candidate.match_score = 78
+    candidate.summary = "Good match based on skills"
+    candidate.status = "UNDER_REVIEW"
+    candidate.save()
+
+    return redirect("candidates")
+
+
+@login_required
+def screen_all(request):
+    candidates = Candidate.objects.filter(match_score=0)
+
+    for c in candidates:
+        c.match_score = 75
+        c.summary = "Auto screened"
+        c.status = "UNDER_REVIEW"
+        c.save()
+
+    return redirect("candidates")

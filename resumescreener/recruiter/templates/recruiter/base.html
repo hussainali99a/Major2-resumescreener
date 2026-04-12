@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>HR Agent</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -7,86 +8,111 @@
 
 <body class="bg-gray-100 flex flex-col min-h-screen">
 
-<!-- NAVBAR -->
-<nav class="bg-blue-600 p-4 text-white flex justify-between">
-    <h1 class="text-xl font-bold">HR Agent</h1>
+    <!-- NAVBAR -->
+    <nav class="bg-blue-600 p-4 text-white flex justify-between">
+        <h1 class="text-xl font-bold">HR Agent</h1>
 
-    <div>
-        {% if user.is_authenticated %}
+        <div>
+            {% if user.is_authenticated %}
             <a href="/dashboard/" class="mr-4">Dashboard</a>
             <a href="/logout/">Logout</a>
-        {% else %}
+            {% else %}
             <a href="/login/" class="mr-4">Login</a>
             <a href="/signup/">Signup</a>
-        {% endif %}
-    </div>
-</nav>
-
-<!-- MAIN CONTENT -->
-<main class="flex-grow">
-    {% block content %}{% endblock %}
-</main>
-
-<!-- FOOTER -->
-<footer class="bg-gray-900 text-gray-300 mt-auto">
-    <div class="max-w-7xl mx-auto px-6 py-8 grid md:grid-cols-3 gap-8">
-
-        <!-- BRAND -->
-        <div>
-            <h2 class="text-xl font-bold text-white mb-3">HR Agent</h2>
-            <p class="text-sm">
-                AI-powered recruitment automation platform to streamline hiring workflows.
-            </p>
+            {% endif %}
         </div>
+    </nav>
 
-        <!-- QUICK LINKS -->
-        <div>
-            <h3 class="text-white font-semibold mb-3">Quick Links</h3>
-            <ul class="space-y-2 text-sm">
-                <li><a href="/" class="hover:text-white">Home</a></li>
-                <li><a href="/dashboard/" class="hover:text-white">Dashboard</a></li>
-                <li><a href="/login/" class="hover:text-white">Login</a></li>
-                <li><a href="/signup/" class="hover:text-white">Signup</a></li>
-            </ul>
-        </div>
+    <!-- MAIN CONTENT -->
+    <div class="flex min-h-screen bg-slate-100">
 
-        <!-- SOCIAL LINKS -->
-        <div>
-            <h3 class="text-white font-semibold mb-3">Connect</h3>
-
-            <div class="flex space-x-4">
-
-                <!-- LinkedIn -->
-                <a href="#" class="hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor">
-                        <path d="M4.98 3.5C4.98 4.88 3.86 6 2.49 6S0 4.88 0 3.5 1.12 1 2.49 1s2.49 1.12 2.49 2.5zM.48 8.98h4V24h-4V8.98zM7.98 8.98h3.84v2.05h.05c.53-1 1.83-2.05 3.76-2.05 4.02 0 4.76 2.64 4.76 6.07V24h-4v-7.6c0-1.81-.03-4.14-2.52-4.14-2.52 0-2.9 1.97-2.9 4v7.74h-4V8.98z"/>
-                    </svg>
-                </a>
-
-                <!-- GitHub -->
-                <a href="#" class="hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor">
-                        <path d="M12 .5C5.73.5.5 5.73.5 12c0 5.1 3.29 9.43 7.85 10.96.57.1.78-.25.78-.55v-2.02c-3.19.7-3.86-1.54-3.86-1.54-.52-1.33-1.27-1.68-1.27-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.67 1.25 3.32.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.27-5.23-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.47.11-3.06 0 0 .96-.31 3.14 1.17a10.9 10.9 0 015.72 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.59.23 2.77.11 3.06.73.8 1.18 1.82 1.18 3.07 0 4.39-2.69 5.36-5.25 5.64.41.35.78 1.04.78 2.1v3.11c0 .3.21.66.79.55A11.5 11.5 0 0023.5 12C23.5 5.73 18.27.5 12 .5z"/>
-                    </svg>
-                </a>
-
-                <!-- Twitter -->
-                <a href="#" class="hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor">
-                        <path d="M24 4.56c-.88.39-1.83.65-2.83.77a4.94 4.94 0 002.17-2.72c-.95.56-2 .97-3.12 1.2a4.92 4.92 0 00-8.38 4.49A13.98 13.98 0 011.67 3.15a4.92 4.92 0 001.52 6.57 4.9 4.9 0 01-2.23-.61v.06a4.92 4.92 0 003.95 4.82 4.9 4.9 0 01-2.22.08 4.92 4.92 0 004.6 3.42A9.86 9.86 0 010 19.54a13.94 13.94 0 007.55 2.21c9.06 0 14.02-7.5 14.02-14 0-.21 0-.42-.02-.63A10.03 10.03 0 0024 4.56z"/>
-                    </svg>
-                </a>
-
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-900 text-white flex flex-col">
+            <div class="p-6 text-2xl font-bold tracking-wide border-b border-slate-700">
+                HR Agent
             </div>
+
+            <nav class="flex-1 p-4 space-y-2">
+
+                <a href="{% url 'dashboard' %}" class="flex items-center gap-3 p-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 transition">
+                    🏠 Dashboard
+                </a>
+
+                <a href="{% url 'jobs' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition">
+                    💼 Jobs
+                </a>
+
+            </nav>
+
+        </aside>
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-900 text-gray-300 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 py-8 grid md:grid-cols-3 gap-8">
+
+            <!-- BRAND -->
+            <div>
+                <h2 class="text-xl font-bold text-white mb-3">HR Agent</h2>
+                <p class="text-sm">
+                    AI-powered recruitment automation platform to streamline hiring workflows.
+                </p>
+            </div>
+
+            <!-- QUICK LINKS -->
+            <div>
+                <h3 class="text-white font-semibold mb-3">Quick Links</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="/" class="hover:text-white">Home</a></li>
+                    <li><a href="/dashboard/" class="hover:text-white">Dashboard</a></li>
+                    <li><a href="/login/" class="hover:text-white">Login</a></li>
+                    <li><a href="/signup/" class="hover:text-white">Signup</a></li>
+                </ul>
+            </div>
+
+            <!-- SOCIAL LINKS -->
+            <div>
+                <h3 class="text-white font-semibold mb-3">Connect</h3>
+
+                <div class="flex space-x-4">
+
+                    <!-- LinkedIn -->
+                    <a href="#" class="hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor">
+                            <path
+                                d="M4.98 3.5C4.98 4.88 3.86 6 2.49 6S0 4.88 0 3.5 1.12 1 2.49 1s2.49 1.12 2.49 2.5zM.48 8.98h4V24h-4V8.98zM7.98 8.98h3.84v2.05h.05c.53-1 1.83-2.05 3.76-2.05 4.02 0 4.76 2.64 4.76 6.07V24h-4v-7.6c0-1.81-.03-4.14-2.52-4.14-2.52 0-2.9 1.97-2.9 4v7.74h-4V8.98z" />
+                        </svg>
+                    </a>
+
+                    <!-- GitHub -->
+                    <a href="#" class="hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor">
+                            <path
+                                d="M12 .5C5.73.5.5 5.73.5 12c0 5.1 3.29 9.43 7.85 10.96.57.1.78-.25.78-.55v-2.02c-3.19.7-3.86-1.54-3.86-1.54-.52-1.33-1.27-1.68-1.27-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.67 1.25 3.32.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.27-5.23-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.47.11-3.06 0 0 .96-.31 3.14 1.17a10.9 10.9 0 015.72 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.59.23 2.77.11 3.06.73.8 1.18 1.82 1.18 3.07 0 4.39-2.69 5.36-5.25 5.64.41.35.78 1.04.78 2.1v3.11c0 .3.21.66.79.55A11.5 11.5 0 0023.5 12C23.5 5.73 18.27.5 12 .5z" />
+                        </svg>
+                    </a>
+
+                    <!-- Twitter -->
+                    <a href="#" class="hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor">
+                            <path
+                                d="M24 4.56c-.88.39-1.83.65-2.83.77a4.94 4.94 0 002.17-2.72c-.95.56-2 .97-3.12 1.2a4.92 4.92 0 00-8.38 4.49A13.98 13.98 0 011.67 3.15a4.92 4.92 0 001.52 6.57 4.9 4.9 0 01-2.23-.61v.06a4.92 4.92 0 003.95 4.82 4.9 4.9 0 01-2.22.08 4.92 4.92 0 004.6 3.42A9.86 9.86 0 010 19.54a13.94 13.94 0 007.55 2.21c9.06 0 14.02-7.5 14.02-14 0-.21 0-.42-.02-.63A10.03 10.03 0 0024 4.56z" />
+                        </svg>
+                    </a>
+
+                </div>
+            </div>
+
         </div>
 
-    </div>
-
-    <!-- COPYRIGHT -->
-    <div class="text-center text-sm py-4 border-t border-gray-700">
-        © 2026 HR Agent. All rights reserved.
-    </div>
-</footer>
+        <!-- COPYRIGHT -->
+        <div class="text-center text-sm py-4 border-t border-gray-700">
+            © 2026 HR Agent. All rights reserved.
+        </div>
+    </footer>
 
 </body>
+
 </html>

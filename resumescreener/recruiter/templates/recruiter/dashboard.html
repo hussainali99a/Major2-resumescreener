@@ -1,126 +1,82 @@
 {% extends "recruiter/base.html" %}
 {% block content %}
 
-<div class="flex min-h-screen bg-slate-100">
+<main class="flex-1 p-8">
 
-  <!-- Sidebar -->
-  <aside class="w-64 bg-slate-900 text-white flex flex-col">
-    <div class="p-6 text-2xl font-bold tracking-wide border-b border-slate-700">
-      HR Agent
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-slate-800">Dashboard</h1>
+
+    <div class="bg-white px-4 py-2 rounded-lg shadow text-sm">
+      Welcome, {{ request.user.first_name }}
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+    <div
+      class="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white p-6 rounded-xl shadow-lg hover:scale-105 transition">
+      <h2 class="text-sm">Total Jobs</h2>
+      <p class="text-3xl font-bold mt-2">{{ jobs_count }}</p>
     </div>
 
-    <nav class="flex-1 p-4 space-y-2">
-
-      <a href="#" class="flex items-center gap-3 p-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 transition">
-        🏠 Dashboard
-      </a>
-
-      <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition">
-        👤 Candidates
-      </a>
-
-      <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition">
-        💼 Jobs
-      </a>
-
-      <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition">
-        📊 Analytics
-      </a>
-
-      <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition">
-        ⚙️ Settings
-      </a>
-
-      <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition">
-        👤 Profile
-      </a>
-
-    </nav>
-
-    <div class="p-4 border-t border-slate-700">
-      <a href="{% url 'logout' %}" class="block text-center bg-red-500 hover:bg-red-600 p-2 rounded-lg">
-        Logout
-      </a>
-    </div>
-  </aside>
-
-
-  <!-- Main Content -->
-  <main class="flex-1 p-8">
-
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
-      <h1 class="text-3xl font-bold text-slate-800">Dashboard</h1>
-
-      <div class="bg-white px-4 py-2 rounded-lg shadow text-sm">
-        Welcome, {{ request.user.first_name }}
-      </div>
+    <div
+      class="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white p-6 rounded-xl shadow-lg hover:scale-105 transition">
+      <h2 class="text-sm">Candidates</h2>
+      <p class="text-3xl font-bold mt-2">{{ candidates_count }}</p>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-
-      <div class="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white p-6 rounded-xl shadow-lg hover:scale-105 transition">
-        <h2 class="text-sm">Total Jobs</h2>
-        <p class="text-3xl font-bold mt-2">{{ jobs_count }}</p>
-      </div>
-
-      <div class="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white p-6 rounded-xl shadow-lg hover:scale-105 transition">
-        <h2 class="text-sm">Candidates</h2>
-        <p class="text-3xl font-bold mt-2">{{ candidates_count }}</p>
-      </div>
-
-      <div class="bg-gradient-to-r from-purple-500 to-purple-700 text-white p-6 rounded-xl shadow-lg hover:scale-105 transition">
-        <h2 class="text-sm">Shortlisted</h2>
-        <p class="text-3xl font-bold mt-2">--</p>
-      </div>
-
-      <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-xl shadow-lg hover:scale-105 transition">
-        <h2 class="text-sm">Interviews</h2>
-        <p class="text-3xl font-bold mt-2">--</p>
-      </div>
-
+    <div
+      class="bg-gradient-to-r from-purple-500 to-purple-700 text-white p-6 rounded-xl shadow-lg hover:scale-105 transition">
+      <h2 class="text-sm">Shortlisted</h2>
+      <p class="text-3xl font-bold mt-2">--</p>
     </div>
 
-    <!-- Content Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-      <!-- Recent Jobs -->
-      <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-        <h2 class="text-lg font-semibold mb-4 text-slate-700">Recent Jobs</h2>
-
-        <ul class="space-y-3">
-          {% for job in recent_jobs %}
-            <li class="p-3 border rounded-lg hover:bg-slate-50 transition">
-              <p class="font-medium">{{ job.title }}</p>
-              <p class="text-sm text-gray-500">{{ job.created_at }}</p>
-            </li>
-          {% empty %}
-            <p class="text-gray-500">No jobs available</p>
-          {% endfor %}
-        </ul>
-      </div>
-
-      <!-- Recent Candidates -->
-      <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-        <h2 class="text-lg font-semibold mb-4 text-slate-700">Recent Candidates</h2>
-
-        <ul class="space-y-3">
-          {% for candidate in recent_candidates %}
-            <li class="p-3 border rounded-lg hover:bg-slate-50 transition">
-              <p class="font-medium">{{ candidate.name }}</p>
-              <p class="text-sm text-gray-500">{{ candidate.email }}</p>
-            </li>
-          {% empty %}
-            <p class="text-gray-500">No candidates available</p>
-          {% endfor %}
-        </ul>
-      </div>
-
+    <div
+      class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-xl shadow-lg hover:scale-105 transition">
+      <h2 class="text-sm">Interviews</h2>
+      <p class="text-3xl font-bold mt-2">--</p>
     </div>
 
-  </main>
+  </div>
 
-</div>
+  <!-- Content Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
+    <!-- Recent Jobs -->
+    <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+      <h2 class="text-lg font-semibold mb-4 text-slate-700">Recent Jobs</h2>
+
+      <ul class="space-y-3">
+        {% for job in recent_jobs %}
+        <li class="p-3 border rounded-lg hover:bg-slate-50 transition">
+          <p class="font-medium">{{ job.title }}</p>
+          <p class="text-sm text-gray-500">{{ job.created_at }}</p>
+        </li>
+        {% empty %}
+        <p class="text-gray-500">No jobs available</p>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Recent Candidates -->
+    <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+      <h2 class="text-lg font-semibold mb-4 text-slate-700">Recent Candidates</h2>
+
+      <ul class="space-y-3">
+        {% for candidate in recent_candidates %}
+        <li class="p-3 border rounded-lg hover:bg-slate-50 transition">
+          <p class="font-medium">{{ candidate.name }}</p>
+          <p class="text-sm text-gray-500">{{ candidate.email }}</p>
+        </li>
+        {% empty %}
+        <p class="text-gray-500">No candidates available</p>
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+
+</main>
 {% endblock %}
