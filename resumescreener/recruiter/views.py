@@ -1,86 +1,9 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import get_user_model
-from .forms import SignupForm, LoginForm
-from .models import Job, Candidate
+from recruiter.models import Job, Candidate, User
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
-
-
-
-# ✅ Correct way to use User model
-User = get_user_model()
-
-
-# ----------------------
-# HOME / LANDING
-# ----------------------
-
-def home(request):
-    return render(request, 'home.html')
-
-
-# ----------------------
-# AUTH
-# ----------------------
-
-def signup_view(request):
-    if request.method == 'POST':
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-
-            # ✅ IMPORTANT: set username = email
-            user.username = form.cleaned_data['email']
-            user.save()
-
-            print("User created:", user.email)
-
-            # ✅ redirect works here
-            return redirect('login')
-        else:
-            print(form.errors)  # debug errors
-    else:
-        form = SignupForm()
-
-    return render(request, 'signup.html', {'form': form})
-
-
-def login_view(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
-
-            print("Trying login:", email, password)
-
-            # ✅ FIX: use username=email
-            user = authenticate(request, username=email, password=password)
-
-            if user is not None:
-                print("Authenticated:", user.email)
-
-                login(request, user)
-
-                # ✅ redirect to dashboard
-                return redirect('dashboard')
-            else:
-                print("Authentication failed")
-                form.add_error(None, "Invalid email or password")
-        else:
-            print(form.errors)
-    else:
-        form = LoginForm()
-
-    return render(request, 'login.html', {'form': form})
-
-
-def logout_view(request):
-    logout(request)
-    return redirect('login')
 
 
 # ----------------------
@@ -99,7 +22,7 @@ def dashboard(request):
         'recent_candidates': candidates[:5],
     }
 
-    return render(request, 'dashboard.html', context)
+    return render(request, 'recruiter/dashboard.html', context)
 
 
 @login_required(login_url='login')
@@ -140,7 +63,7 @@ def jobs_view(request):
     page_obj = paginator.get_page(page_number)
 
 
-    return render(request, 'job.html', {
+    return render(request, 'recruiter/job.html', {
         'page_obj': page_obj,
         'query': query
     })
@@ -171,9 +94,9 @@ def candidates_view(request):
             status="Screening"
         )
 
-        return redirect(f'/candidates/?job_id={job_id}')
+        return redirect(f'/hr/candidates/?job_id={job_id}')
 
-    return render(request, 'candidates.html', {
+    return render(request, 'recruiter/candidates.html', {
         'jobs': jobs,
         'candidates': candidates,
         'selected_job': job_id
