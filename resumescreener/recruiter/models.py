@@ -53,6 +53,8 @@ class Candidate(models.Model):
     
     resume_text = models.TextField(blank=True)
 
+    class Meta:
+        unique_together = ('job', 'file_hash')
     def __str__(self):
         return f"{self.name} - {self.job.title}"
 

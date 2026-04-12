@@ -1,40 +1,38 @@
 {% extends "recruiter/base.html" %}
 {% block content %}
 
-<!-- Heroicons CDN -->
 <script src="https://unpkg.com/heroicons@2.0.18/dist/heroicons.js"></script>
-
 
 <main class="flex-1 p-8">
 
-  <!-- Header -->
+  <!-- HEADER -->
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-3xl font-bold text-slate-800 flex items-center gap-2">
       💼 Jobs
     </h1>
 
-    <!-- Create Job Button -->
     <button onclick="openModal()"
       class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg shadow hover:bg-emerald-500 transition transform hover:scale-105">
       ➕ Create Job
     </button>
   </div>
 
-  <!-- Search Bar -->
+  <!-- SEARCH -->
   <form method="GET" class="mb-6">
     <div class="relative">
       <input type="text" name="q" value="{{ query }}" placeholder="Search jobs..."
         class="w-full p-3 pl-10 border rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-400">
-
       <span class="absolute left-3 top-3 text-gray-400">🔍</span>
     </div>
   </form>
 
-  <!-- Job List -->
+  <!-- JOB GRID -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
     {% for job in page_obj %}
-    <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1">
+    <div onclick="openJobDrawer('{{ job.id }}')"
+      class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1 cursor-pointer">
+
       <h2 class="text-lg font-semibold text-slate-800">{{ job.title }}</h2>
       <p class="text-sm text-gray-500 mt-1">{{ job.profile }}</p>
 
@@ -45,14 +43,17 @@
       <div class="mt-4 text-xs text-gray-400">
         {{ job.created_at }}
       </div>
+
     </div>
     {% empty %}
-    <p class="text-gray-500">No jobs found.</p>
+    <div class="col-span-full text-center text-gray-500 py-10">
+      No jobs found.
+    </div>
     {% endfor %}
 
   </div>
 
-  <!-- Pagination -->
+  <!-- PAGINATION -->
   <div class="mt-8 flex justify-center items-center gap-2">
 
     {% if page_obj.has_previous %}
@@ -73,13 +74,11 @@
 
 </main>
 
+<!-- ================= CREATE JOB MODAL ================= -->
 
-<!-- ================= MODAL ================= -->
+<div id="jobModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
 
-<div id="jobModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50 transition">
-
-  <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg transform scale-95 transition duration-300"
-    id="modalContent">
+  <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg transform scale-95 transition" id="modalContent">
 
     <h2 class="text-xl font-semibold mb-4">Create Job</h2>
 
@@ -107,10 +106,80 @@
   </div>
 </div>
 
+<!-- ================= DRAWER ================= -->
+
+<div id="drawerOverlay" class="fixed inset-0 bg-black bg-opacity-30 hidden z-40" onclick="closeJobDrawer()"></div>
+
+<div id="jobDrawer"
+  class="fixed top-0 right-0 h-full w-full md:w-1/2 bg-white shadow-2xl transform translate-x-full transition duration-300 z-50 flex flex-col">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center p-4 border-b">
+    <h2 class="text-xl font-semibold">Job Details</h2>
+    <button onclick="closeJobDrawer()">✖</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="p-4 overflow-y-auto flex-1">
+
+    <div id="jobDetails" class="mb-6 space-y-4">
+
+      <!-- Title -->
+      <div>
+        <p class="text-sm text-gray-500">Job Title</p>
+        <h3 id="jobTitle" class="text-xl font-bold text-slate-800"></h3>
+      </div>
+
+      <!-- Profile -->
+      <div>
+        <p class="text-sm text-gray-500">Profile</p>
+        <p id="jobProfile" class="text-gray-700 font-medium"></p>
+      </div>
+
+      <!-- Posted Date -->
+      <div>
+        <p class="text-sm text-gray-500">Posted On</p>
+        <p id="jobDate" class="text-gray-600"></p>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <p class="text-sm text-gray-500">Description</p>
+        <p id="jobDescription" class="text-gray-700 leading-relaxed"></p>
+      </div>
+
+    </div>
+    <h3 class="text-lg font-semibold mb-2">Candidates</h3>
+
+    <div class="overflow-x-auto">
+      <table class="w-full border rounded-lg">
+        <thead class="bg-gray-100 text-sm">
+          <tr>
+            <th class="p-3">Name</th>
+            <th class="p-3">Email</th>
+            <th class="p-3">Score</th>
+            <th class="p-3">Status</th>
+          </tr>
+        </thead>
+        <tbody id="candidateTable"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="p-4 border-t">
+    <a id="goToCandidates" class="block text-center bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-500">
+      View Full Candidates Page →
+    </a>
+  </div>
+
+</div>
 
 <!-- ================= SCRIPT ================= -->
 
 <script>
+
   function openModal() {
     const modal = document.getElementById('jobModal');
     const content = document.getElementById('modalContent');
@@ -131,11 +200,65 @@
     content.classList.remove('scale-100');
     content.classList.add('scale-95');
 
-    setTimeout(() => {
-      modal.classList.add('hidden');
-    }, 200);
+    setTimeout(() => modal.classList.add('hidden'), 200);
   }
+
+  function openJobDrawer(jobId) {
+    const drawer = document.getElementById('jobDrawer');
+    const overlay = document.getElementById('drawerOverlay');
+
+    drawer.classList.remove('translate-x-full');
+    overlay.classList.remove('hidden');
+
+    // Job details
+    fetch(`/hr/jobs/${jobId}/`)
+      .then(res => res.json())
+      .then(job => {
+
+        document.getElementById('jobTitle').innerText = job.title;
+        document.getElementById('jobProfile').innerText = job.profile;
+        document.getElementById('jobDescription').innerText = job.description;
+
+        // format date nicely
+        const date = new Date(job.created_at);
+        document.getElementById('jobDate').innerText =
+          date.toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          });
+
+      });
+
+    // Candidates
+    fetch(`/hr/jobs/${jobId}/candidates-api/`)
+      .then(res => res.json())
+      .then(data => {
+
+        if (data.length === 0) {
+          document.getElementById('candidateTable').innerHTML =
+            `<tr><td colspan="4" class="p-3 text-center text-gray-500">No candidates</td></tr>`;
+          return;
+        }
+
+        document.getElementById('candidateTable').innerHTML = data.map(c => `
+        <tr class="border-t">
+          <td class="p-3">${c.name}</td>
+          <td class="p-3">${c.email}</td>
+          <td class="p-3 text-indigo-600 font-semibold">${c.score}%</td>
+          <td class="p-3">${c.status}</td>
+        </tr>
+      `).join('');
+      });
+
+    document.getElementById('goToCandidates').href = `/hr/jobs/${jobId}/candidates/`;
+  }
+
+  function closeJobDrawer() {
+    document.getElementById('jobDrawer').classList.add('translate-x-full');
+    document.getElementById('drawerOverlay').classList.add('hidden');
+  }
+
 </script>
 
 {% endblock %}
-

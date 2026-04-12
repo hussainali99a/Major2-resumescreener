@@ -98,11 +98,10 @@ def candidates_view(request, job_id=None):
             return redirect(f'jobs/{job_id}/candidates/')
 
         # 🧠 Extract text (basic version)
-        resume_text = extract_text_from_resume(resume)  # create this
+        resume_text, email = extract_text_from_resume(resume)  # create this
 
         # 🧠 Dummy parsing (replace later with AI)
-        name = "Parsed Name"
-        email = "parsed@email.com"
+        name = resume_text.split('\n')[0] if resume_text else "Unknown"
 
         Candidate.objects.create(
             user=request.user,
@@ -117,7 +116,7 @@ def candidates_view(request, job_id=None):
             status="UNDER_REVIEW"
         )
 
-        return redirect(f'/hr/candidates/?job_id={job_id}')
+        return redirect(f'/hr/jobs/{job_id}/candidates/')
 
     jobs = Job.objects.filter(user=request.user)
     return render(request, 'recruiter/candidates.html', {
@@ -129,6 +128,20 @@ def candidates_view(request, job_id=None):
         'avg_per_job': round(avg_per_job, 2)
     })
 
+@login_required
+def job_candidates_api(request, job_id):
+    candidates = Candidate.objects.filter(job_id=job_id)
+
+    data = []
+    for c in candidates:
+        data.append({
+            "name": c.name,
+            "email": c.email,
+            "score": c.match_score,
+            "status": c.status
+        })
+
+    return JsonResponse(data, safe=False)
 
 @login_required
 def candidate_detail_api(request, id):
@@ -137,24 +150,25 @@ def candidate_detail_api(request, id):
     return JsonResponse({
         "name": c.name,
         "email": c.email,
-        "summary": getattr(c, 'summary', "N/A"),
-        "score": c.score,
-        "status": c.status
-    })
+        "summary": c.summary,
+        "score": c.match_score,
+        "status": c.status,
+        "resume_url": c.resume_file.url
+})
     
 @login_required
-def job_detail_api(request, id):
-    job = Job.objects.get(id=id, user=request.user)
+def job_detail_api(request, job_id):
+    job = Job.objects.get(id=job_id, user=request.user)
 
     return JsonResponse({
         "title": job.title,
         "profile": job.profile,
         "description": job.description,
-        "created_at": job.created_at.strftime("%Y-%m-%d"),
+        "created_at": job.created_at.isoformat()
     })
 
 @login_required
-def screen_single(request, id):
+def screen_single(request, job_id, id):
     candidate = Candidate.objects.get(id=id)
 
     # 🔥 Replace with LLM later
@@ -163,12 +177,12 @@ def screen_single(request, id):
     candidate.status = "UNDER_REVIEW"
     candidate.save()
 
-    return redirect("candidates")
+    return redirect(f"/hr/jobs/{job_id}/candidates/")
 
 
 @login_required
-def screen_all(request):
-    candidates = Candidate.objects.filter(match_score=0)
+def screen_all(request, job_id):
+    candidates = Candidate.objects.filter(match_score=0, job_id=job_id)
 
     for c in candidates:
         c.match_score = 75
@@ -176,4 +190,4 @@ def screen_all(request):
         c.status = "UNDER_REVIEW"
         c.save()
 
-    return redirect("candidates")
+    return redirect(f"/hr/jobs/{job_id}/candidates/")
