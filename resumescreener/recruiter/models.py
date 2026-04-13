@@ -17,47 +17,47 @@ class Candidate(models.Model):
         ('ACCEPTED', 'Accepted'),
         ('REJECTED', 'Rejected'),
         ('UNDER_REVIEW', 'Under Review'),
-        
+        ('NOT_SCREENED', 'Not Screened'),
     ]
-    status = models.CharField(
-        max_length=50,
-        choices=[
-            ('Screening', 'Screening'),
-            ('Shortlisted', 'Shortlisted'),
-            ('Rejected', 'Rejected')
-        ],
-        default='Screening'
-    )
 
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='candidates')
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
+    # Basic Info
     name = models.CharField(max_length=255)
     email = models.EmailField()
     phone = models.CharField(max_length=20, blank=True)
 
+    # Resume & File
     resume_file = models.FileField(upload_to='resumes/')
-    file_hash = models.CharField(max_length=64, unique=True)
-
-    skills = models.TextField(blank=True)
-    experience = models.IntegerField(default=0)
-
-    linkedin = models.URLField(blank=True, null=True)
-
-    match_score = models.FloatField()
-    summary = models.TextField()
-
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='UNDER_REVIEW')
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    
     resume_text = models.TextField(blank=True)
+    file_hash = models.CharField(max_length=64)
+
+    # Profiles
+    linkedin = models.URLField(blank=True, null=True)
+    github = models.URLField(blank=True, null=True)
+    portfolio = models.URLField(blank=True, null=True)
+
+    # AI Extracted Insights
+    extracted_skills = models.JSONField(default=list, blank=True)
+    demonstrated_skills = models.JSONField(default=list, blank=True)
+    listed_skills_only = models.JSONField(default=list, blank=True)
+    strengths = models.JSONField(default=list, blank=True)
+    gaps = models.JSONField(default=list, blank=True)
+    experience = models.FloatField(default=0)
+    summary = models.TextField(blank=True)
+    match_score = models.FloatField(default=0)
+    recommendation = models.CharField(max_length=20, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NOT_SCREENED')
+    is_screened = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('job', 'file_hash')
+
     def __str__(self):
         return f"{self.name} - {self.job.title}"
-
+    
 
 class DecisionLog(models.Model):
     ACTION_CHOICES = [
