@@ -1,23 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.db import models
-from django.contrib.auth import get_user_model
-
-class User(AbstractUser):
-    email = models.EmailField(unique=True)
-    is_verified = models.BooleanField(default=False)
-    is_recruiter = models.BooleanField(default=False)
-    company_name = models.CharField(max_length=255, blank=True)
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']  # still required internally
-
-    def __str__(self):
-        return self.email
+from accounts.models import User
 
 class Job(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
-    # job_id = models.CharField(max_length=20)
     title = models.CharField(max_length=255)
     description = models.TextField()
     profile = models.CharField(max_length=255)
@@ -68,6 +53,8 @@ class Candidate(models.Model):
     
     resume_text = models.TextField(blank=True)
 
+    class Meta:
+        unique_together = ('job', 'file_hash')
     def __str__(self):
         return f"{self.name} - {self.job.title}"
 
@@ -97,14 +84,4 @@ class Interview(models.Model):
     
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     
-    
-
-# class Job(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     title = models.CharField(max_length=255)
-#     profile = models.CharField(max_length=255)
-#     description = models.TextField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-
-
 

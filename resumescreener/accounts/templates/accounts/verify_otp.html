@@ -1,0 +1,50 @@
+{% extends "accounts/base.html" %}
+{% block content %}
+
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+  <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+
+    <h2 class="text-2xl font-bold mb-2 text-center">Verify Your Email</h2>
+    <p class="text-center text-gray-500 mb-6 text-sm">
+      Enter the 6-digit OTP sent to your email
+    </p>
+
+    <!-- ERROR MESSAGE -->
+    {% if error %}
+      <div class="bg-red-100 text-red-600 p-2 rounded mb-4 text-sm text-center">
+        {{ error }}
+      </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-4">
+      {% csrf_token %}
+
+      <!-- OTP INPUT -->
+      <input type="text" name="otp" maxlength="6"
+        placeholder="Enter OTP"
+        class="w-full p-3 border rounded-lg text-center tracking-widest text-lg"
+        required>
+
+      <button type="submit"
+        class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700">
+        Verify OTP
+      </button>
+    </form>
+
+    <!-- RESEND -->
+    <form method="POST" action="{% url 'resend_otp' %}" class="mt-4 text-center">
+      {% csrf_token %}
+      <button class="text-blue-600 text-sm hover:underline">
+        Resend OTP
+      </button>
+    </form>
+
+    <p class="mt-4 text-center text-sm">
+      Wrong email?
+      <a href="{% url 'signup' %}" class="text-blue-600">Go back</a>
+    </p>
+
+  </div>
+</div>
+
+{% endblock %}
