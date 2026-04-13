@@ -17,16 +17,18 @@ class Candidate(models.Model):
         ('ACCEPTED', 'Accepted'),
         ('REJECTED', 'Rejected'),
         ('UNDER_REVIEW', 'Under Review'),
+        ('UNSCREENED', 'Unscreened'),
         
     ]
-    status = models.CharField(
+    candidate_status = models.CharField(
         max_length=50,
         choices=[
-            ('Screening', 'Screening'),
-            ('Shortlisted', 'Shortlisted'),
-            ('Rejected', 'Rejected')
+            ('unscreened', 'Unscreened'),
+            ('screening', 'Screening'),
+            ('shortlisted', 'Shortlisted'),
+            ('rejected', 'Rejected')
         ],
-        default='Screening'
+        default='unscreened'
     )
 
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='candidates')
@@ -35,22 +37,19 @@ class Candidate(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField()
     phone = models.CharField(max_length=20, blank=True)
-
     resume_file = models.FileField(upload_to='resumes/')
-    file_hash = models.CharField(max_length=64, unique=True)
-
+    file_hash = models.CharField(max_length=64)
     skills = models.TextField(blank=True)
     experience = models.IntegerField(default=0)
 
     linkedin = models.URLField(blank=True, null=True)
-
+    twitter = models.URLField(blank=True, null=True)
+    github = models.URLField(blank=True, null=True)
+    portfolio = models.URLField(blank=True, null=True)
     match_score = models.FloatField()
     summary = models.TextField()
-
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='UNDER_REVIEW')
-
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='UNSCREENED')
     created_at = models.DateTimeField(auto_now_add=True)
-    
     resume_text = models.TextField(blank=True)
 
     class Meta:

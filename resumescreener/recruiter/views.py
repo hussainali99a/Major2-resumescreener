@@ -88,14 +88,14 @@ def candidates_view(request, job_id=None):
         resume = request.FILES.get('resume')
 
         if not resume or not job_id:
-            return redirect(f'jobs/{job_id}/candidates/')
+            return redirect(f'/hr/jobs/{job_id}/candidates/')
 
         # 🔐 hash file (avoid duplicates)
         file_hash = hashlib.sha256(resume.read()).hexdigest()
         resume.seek(0)
 
         if Candidate.objects.filter(file_hash=file_hash, job_id=job_id).exists():
-            return redirect(f'jobs/{job_id}/candidates/')
+            return redirect(f'/hr/jobs/{job_id}/candidates/')
 
         # 🧠 Extract text (basic version)
         resume_text, email = extract_text_from_resume(resume)  # create this
@@ -113,7 +113,6 @@ def candidates_view(request, job_id=None):
             resume_text=resume_text,
             match_score=0,
             summary="Pending AI screening",
-            status="UNDER_REVIEW"
         )
 
         return redirect(f'/hr/jobs/{job_id}/candidates/')
