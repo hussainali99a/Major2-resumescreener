@@ -147,13 +147,36 @@ def candidate_detail_api(request, id):
     c = Candidate.objects.get(id=id)
 
     return JsonResponse({
+        # Basic info
         "name": c.name,
         "email": c.email,
-        "summary": c.summary,
-        "score": c.match_score,
+        "phone": c.phone,
+
+        # Status + score
         "status": c.status,
-        "resume_url": c.resume_file.url
-})
+        "score": c.match_score,
+        "summary": c.summary,
+
+        # Resume
+        "resume_url": c.resume_file.url if c.resume_file else "",
+
+        # AI extracted details
+        "skills": c.extracted_skills if c.extracted_skills else [],
+        "demonstrated_skills": c.demonstrated_skills if c.demonstrated_skills else [],
+        "listed_skills_only": c.listed_skills_only if c.listed_skills_only else [],
+
+        "strengths": c.strengths if c.strengths else [],
+        "gaps": c.gaps if c.gaps else [],
+
+        # Profiles
+        "linkedin": c.linkedin,
+        "github": c.github,
+        "portfolio": c.portfolio,
+
+        # Extra (optional but useful)
+        "experience": c.experience,
+        "recommendation": c.recommendation,
+    })
     
 @login_required
 def job_detail_api(request, job_id):
@@ -166,18 +189,50 @@ def job_detail_api(request, job_id):
         "created_at": job.created_at.isoformat()
     })
 
+
+from recruiter.services.chains import run_resume_screening
+
 @login_required
 def screen_single(request, job_id, id):
     candidate = Candidate.objects.get(id=id)
+    if candidate.is_screened:
+        return redirect(f"/hr/jobs/{job_id}/candidates/")
+    job = Job.objects.get(id=job_id)
 
-    # 🔥 Replace with LLM later
-    candidate.match_score = 78
-    candidate.summary = "Good match based on skills"
-    candidate.status = "UNDER_REVIEW"
+    result = run_resume_screening(
+        candidate.resume_text,
+        job.description
+    )
+
+    candidate.name = result.name or candidate.name
+    candidate.email = result.email or candidate.email
+    candidate.phone = result.phone or candidate.phone
+    candidate.linkedin = result.linkedin
+    candidate.github = result.github
+    candidate.portfolio = result.portfolio
+
+    candidate.extracted_skills = result.all_skills
+    candidate.demonstrated_skills = result.demonstrated_skills
+    candidate.listed_skills_only = result.listed_skills_only
+    candidate.strengths = result.strengths
+    candidate.gaps = result.gaps
+
+    candidate.experience = result.experience_years
+    candidate.summary = result.reasoning
+    candidate.match_score = result.match_score
+    candidate.recommendation = result.recommendation
+    candidate.is_screened = True
+
+    if result.recommendation == "ACCEPT":
+        candidate.status = "ACCEPTED"
+    elif result.recommendation == "REJECT":
+        candidate.status = "REJECTED"
+    else:
+        candidate.status = "UNDER_REVIEW"
+
     candidate.save()
 
     return redirect(f"/hr/jobs/{job_id}/candidates/")
-
 
 @login_required
 def screen_all(request, job_id):
