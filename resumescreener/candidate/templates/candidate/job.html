@@ -1,114 +1,104 @@
-{% extends "base.html" %}
+{% extends "candidate/base.html" %}
 {% block content %}
 
-<!-- Heroicons CDN -->
 <script src="https://unpkg.com/heroicons@2.0.18/dist/heroicons.js"></script>
 
-<div class="flex min-h-screen bg-slate-100">
+<main class="flex-1 p-8">
 
-  <!-- Sidebar (reuse your existing one if already in base.html) -->
+  <!-- HEADER -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-slate-800 flex items-center gap-2">
+      💼 Jobs
+    </h1>
 
-  <main class="flex-1 p-8">
+    <button onclick="openModal()"
+      class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg shadow hover:bg-emerald-500 transition transform hover:scale-105">
+      ➕ Create Job
+    </button>
+  </div>
 
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-slate-800 flex items-center gap-2">
-        💼 Jobs
-      </h1>
-
-      <!-- Create Job Button -->
-      <button onclick="openModal()"
-        class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg shadow hover:bg-emerald-500 transition transform hover:scale-105">
-        ➕ Create Job
-      </button>
+  <!-- SEARCH -->
+  <form method="GET" class="mb-6">
+    <div class="relative">
+      <input type="text" name="q" value="{{ query }}" placeholder="Search jobs..."
+        class="w-full p-3 pl-10 border rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-400">
+      <span class="absolute left-3 top-3 text-gray-400">🔍</span>
     </div>
+  </form>
 
-    <!-- Search Bar -->
-    <form method="GET" class="mb-6">
-      <div class="relative">
-        <input type="text" name="q" value="{{ query }}"
-          placeholder="Search jobs..."
-          class="w-full p-3 pl-10 border rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-400">
+  <!-- JOB GRID -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        <span class="absolute left-3 top-3 text-gray-400">🔍</span>
+    {% for job in page_obj %}
+    <div onclick="openJobDrawer('{{ job.id }}')"
+      class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1 cursor-pointer">
+
+      <h2 class="text-lg font-semibold text-slate-800">{{ job.title }}</h2>
+      <p class="text-sm text-gray-500 mt-1">{{ job.profile }}</p>
+
+      <p class="text-gray-600 mt-3 line-clamp-3">
+        {{ job.description }}
+      </p>
+
+      <div class="mt-4 text-xs text-gray-400">
+        {{ job.created_at }}
       </div>
-    </form>
-
-    <!-- Job List -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-      {% for job in page_obj %}
-      <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1">
-        <h2 class="text-lg font-semibold text-slate-800">{{ job.title }}</h2>
-        <p class="text-sm text-gray-500 mt-1">{{ job.profile }}</p>
-
-        <p class="text-gray-600 mt-3 line-clamp-3">
-          {{ job.description }}
-        </p>
-
-        <div class="mt-4 text-xs text-gray-400">
-          {{ job.created_at }}
-        </div>
-      </div>
-      {% empty %}
-      <p class="text-gray-500">No jobs found.</p>
-      {% endfor %}
 
     </div>
-
-    <!-- Pagination -->
-    <div class="mt-8 flex justify-center items-center gap-2">
-
-      {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}"
-          class="px-3 py-1 bg-white border rounded hover:bg-gray-100">Prev</a>
-      {% endif %}
-
-      <span class="px-4 py-1 bg-emerald-600 text-white rounded">
-        {{ page_obj.number }}
-      </span>
-
-      {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}&q={{ query }}"
-          class="px-3 py-1 bg-white border rounded hover:bg-gray-100">Next</a>
-      {% endif %}
-
+    {% empty %}
+    <div class="col-span-full text-center text-gray-500 py-10">
+      No jobs found.
     </div>
+    {% endfor %}
 
-  </main>
-</div>
+  </div>
 
+  <!-- PAGINATION -->
+  <div class="mt-8 flex justify-center items-center gap-2">
 
-<!-- ================= MODAL ================= -->
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}"
+      class="px-3 py-1 bg-white border rounded hover:bg-gray-100">Prev</a>
+    {% endif %}
 
-<div id="jobModal"
-     class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50 transition">
+    <span class="px-4 py-1 bg-emerald-600 text-white rounded">
+      {{ page_obj.number }}
+    </span>
 
-  <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg transform scale-95 transition duration-300"
-       id="modalContent">
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}&q={{ query }}"
+      class="px-3 py-1 bg-white border rounded hover:bg-gray-100">Next</a>
+    {% endif %}
+
+  </div>
+
+</main>
+
+<!-- ================= CREATE JOB MODAL ================= -->
+
+<div id="jobModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+
+  <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg transform scale-95 transition" id="modalContent">
 
     <h2 class="text-xl font-semibold mb-4">Create Job</h2>
 
     <form method="POST">
       {% csrf_token %}
 
-      <input type="text" name="title" placeholder="Job Title"
-        class="w-full p-3 mb-3 border rounded-lg" required>
+      <input type="text" name="title" placeholder="Job Title" class="w-full p-3 mb-3 border rounded-lg" required>
 
-      <input type="text" name="profile" placeholder="Job Profile"
-        class="w-full p-3 mb-3 border rounded-lg" required>
+      <input type="text" name="profile" placeholder="Job Profile" class="w-full p-3 mb-3 border rounded-lg" required>
+      <input type="text" name="type" hidden value="personal" class="w-full p-3 mb-3 border rounded-lg" required>
 
-      <textarea name="description" placeholder="Job Description"
-        class="w-full p-3 mb-3 border rounded-lg" rows="4" required></textarea>
+      <textarea name="description" placeholder="Job Description" class="w-full p-3 mb-3 border rounded-lg" rows="4"
+        required></textarea>
 
       <div class="flex justify-end gap-2">
-        <button type="button" onclick="closeModal()"
-          class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+        <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
           Cancel
         </button>
 
-        <button type="submit"
-          class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500">
+        <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500">
           Save
         </button>
       </div>
@@ -117,191 +107,162 @@
   </div>
 </div>
 
+<!-- ================= DRAWER ================= -->
 
-<!-- ================= SCRIPT ================= -->
+<div id="drawerOverlay" class="fixed inset-0 bg-black bg-opacity-30 hidden z-40" onclick="closeJobDrawer()"></div>
 
-<script>
-function openModal() {
-  const modal = document.getElementById('jobModal');
-  const content = document.getElementById('modalContent');
+<div id="jobDrawer"
+  class="fixed top-0 right-0 h-full w-full md:w-1/2 bg-white shadow-2xl transform translate-x-full transition duration-300 z-50 flex flex-col">
 
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
+  <!-- HEADER -->
+  <div class="flex justify-between items-center p-4 border-b">
+    <h2 class="text-xl font-semibold">Job Details</h2>
+    <button onclick="closeJobDrawer()">✖</button>
+  </div>
 
-  setTimeout(() => {
-    content.classList.remove('scale-95');
-    content.classList.add('scale-100');
-  }, 50);
-}
+  <!-- CONTENT -->
+  <div class="p-4 overflow-y-auto flex-1">
 
-function closeModal() {
-  const modal = document.getElementById('jobModal');
-  const content = document.getElementById('modalContent');
+    <div id="jobDetails" class="mb-6 space-y-4">
 
-  content.classList.remove('scale-100');
-  content.classList.add('scale-95');
-
-  setTimeout(() => {
-    modal.classList.add('hidden');
-  }, 200);
-}
-</script>
-
-{% endblock %}
-
-
-=======================================================================================================================================
-=======================================================================================================================================
-=======================================================================================================================================
-
-
-{% extends "base.html" %}
-{% block content %}
-
-<!-- Heroicons CDN -->
-<script src="https://unpkg.com/heroicons@2.0.18/dist/heroicons.js"></script>
-
-<div class="flex min-h-screen bg-slate-100">
-
-  <!-- Sidebar (reuse your existing one if already in base.html) -->
-
-  <main class="flex-1 p-8">
-
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-slate-800 flex items-center gap-2">
-        💼 Jobs
-      </h1>
-
-      <!-- Create Job Button -->
-      <button onclick="openModal()"
-        class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg shadow hover:bg-emerald-500 transition transform hover:scale-105">
-        ➕ Create Job
-      </button>
-    </div>
-
-    <!-- Search Bar -->
-    <form method="GET" class="mb-6">
-      <div class="relative">
-        <input type="text" name="q" value="{{ query }}"
-          placeholder="Search jobs..."
-          class="w-full p-3 pl-10 border rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-400">
-
-        <span class="absolute left-3 top-3 text-gray-400">🔍</span>
+      <!-- Title -->
+      <div>
+        <p class="text-sm text-gray-500">Job Title</p>
+        <h3 id="jobTitle" class="text-xl font-bold text-slate-800"></h3>
       </div>
-    </form>
 
-    <!-- Job List -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-      {% for job in page_obj %}
-      <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1">
-        <h2 class="text-lg font-semibold text-slate-800">{{ job.title }}</h2>
-        <p class="text-sm text-gray-500 mt-1">{{ job.profile }}</p>
-
-        <p class="text-gray-600 mt-3 line-clamp-3">
-          {{ job.description }}
-        </p>
-
-        <div class="mt-4 text-xs text-gray-400">
-          {{ job.created_at }}
-        </div>
+      <!-- Profile -->
+      <div>
+        <p class="text-sm text-gray-500">Profile</p>
+        <p id="jobProfile" class="text-gray-700 font-medium"></p>
       </div>
-      {% empty %}
-      <p class="text-gray-500">No jobs found.</p>
-      {% endfor %}
+
+      <!-- Posted Date -->
+      <div>
+        <p class="text-sm text-gray-500">Posted On</p>
+        <p id="jobDate" class="text-gray-600"></p>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <p class="text-sm text-gray-500">Description</p>
+        <p id="jobDescription" class="text-gray-700 leading-relaxed"></p>
+      </div>
 
     </div>
+    <h3 class="text-lg font-semibold mb-2">Resumes</h3>
 
-    <!-- Pagination -->
-    <div class="mt-8 flex justify-center items-center gap-2">
-
-      {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}"
-          class="px-3 py-1 bg-white border rounded hover:bg-gray-100">Prev</a>
-      {% endif %}
-
-      <span class="px-4 py-1 bg-emerald-600 text-white rounded">
-        {{ page_obj.number }}
-      </span>
-
-      {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}&q={{ query }}"
-          class="px-3 py-1 bg-white border rounded hover:bg-gray-100">Next</a>
-      {% endif %}
-
+    <div class="overflow-x-auto">
+      <table class="w-full border rounded-lg">
+        <thead class="bg-gray-100 text-sm">
+          <tr>
+            <th class="p-3">S.No.</th>
+            <th class="p-3">Name</th>
+            <th class="p-3">Link</th>
+            <th class="p-3">Score</th>
+            <th class="p-3">Status</th>
+          </tr>
+        </thead>
+        <tbody id="candidateTable"></tbody>
+      </table>
     </div>
-
-  </main>
-</div>
-
-
-<!-- ================= MODAL ================= -->
-
-<div id="jobModal"
-     class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50 transition">
-
-  <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg transform scale-95 transition duration-300"
-       id="modalContent">
-
-    <h2 class="text-xl font-semibold mb-4">Create Job</h2>
-
-    <form method="POST">
-      {% csrf_token %}
-
-      <input type="text" name="title" placeholder="Job Title"
-        class="w-full p-3 mb-3 border rounded-lg" required>
-
-      <input type="text" name="profile" placeholder="Job Profile"
-        class="w-full p-3 mb-3 border rounded-lg" required>
-
-      <textarea name="description" placeholder="Job Description"
-        class="w-full p-3 mb-3 border rounded-lg" rows="4" required></textarea>
-
-      <div class="flex justify-end gap-2">
-        <button type="button" onclick="closeModal()"
-          class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
-          Cancel
-        </button>
-
-        <button type="submit"
-          class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500">
-          Save
-        </button>
-      </div>
-    </form>
 
   </div>
-</div>
 
+  <!-- FOOTER -->
+  <div class="p-4 border-t">
+    <a id="goToCandidates" class="block text-center bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-500">
+      View Full Resumes Page →
+    </a>
+  </div>
+
+</div>
 
 <!-- ================= SCRIPT ================= -->
 
 <script>
-function openModal() {
-  const modal = document.getElementById('jobModal');
-  const content = document.getElementById('modalContent');
 
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
+  function openModal() {
+    const modal = document.getElementById('jobModal');
+    const content = document.getElementById('modalContent');
 
-  setTimeout(() => {
-    content.classList.remove('scale-95');
-    content.classList.add('scale-100');
-  }, 50);
-}
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 
-function closeModal() {
-  const modal = document.getElementById('jobModal');
-  const content = document.getElementById('modalContent');
+    setTimeout(() => {
+      content.classList.remove('scale-95');
+      content.classList.add('scale-100');
+    }, 50);
+  }
 
-  content.classList.remove('scale-100');
-  content.classList.add('scale-95');
+  function closeModal() {
+    const modal = document.getElementById('jobModal');
+    const content = document.getElementById('modalContent');
 
-  setTimeout(() => {
-    modal.classList.add('hidden');
-  }, 200);
-}
+    content.classList.remove('scale-100');
+    content.classList.add('scale-95');
+
+    setTimeout(() => modal.classList.add('hidden'), 200);
+  }
+
+  function openJobDrawer(jobId) {
+    const drawer = document.getElementById('jobDrawer');
+    const overlay = document.getElementById('drawerOverlay');
+
+    drawer.classList.remove('translate-x-full');
+    overlay.classList.remove('hidden');
+
+    // Job details
+    fetch(`/hr/jobs/${jobId}/?type=personal`)
+      .then(res => res.json())
+      .then(job => {
+
+        document.getElementById('jobTitle').innerText = job.title;
+        document.getElementById('jobProfile').innerText = job.profile;
+        document.getElementById('jobDescription').innerText = job.description;
+
+        // format date nicely
+        const date = new Date(job.created_at);
+        document.getElementById('jobDate').innerText =
+          date.toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          });
+
+      });
+
+    // Candidates
+    fetch(`/hr/jobs/${jobId}/candidates-api/`)
+      .then(res => res.json())
+      .then(data => {
+
+        if (data.length === 0) {
+          document.getElementById('candidateTable').innerHTML =
+            `<tr><td colspan="4" class="p-3 text-center text-gray-500">No candidates</td></tr>`;
+          return;
+        }
+        
+        let count = 1;
+        document.getElementById('candidateTable').innerHTML = data.map(c => `
+        <tr class="border-t">
+          <td class="p-3"><a href="/jobs/${jobId}/resumes/${c.id}/" class="text-indigo-600 hover:underline">${count++}.</a></td>
+          <td class="p-3 capitalize">${c.name}</td>
+          <td class="p-3"><a href="${c.link}" target="_blank" class="text-indigo-600 hover:underline">View Resume</a></td>
+          <td class="p-3 text-indigo-600 font-semibold">${c.score}%</td>
+          <td class="p-3">${c.status}</td>
+        </tr>
+      `).join('');
+      });
+
+    document.getElementById('goToCandidates').href = `/jobs/${jobId}/resumes/`;
+  }
+
+  function closeJobDrawer() {
+    document.getElementById('jobDrawer').classList.add('translate-x-full');
+    document.getElementById('drawerOverlay').classList.add('hidden');
+  }
+
 </script>
 
 {% endblock %}

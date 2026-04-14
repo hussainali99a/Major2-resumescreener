@@ -134,10 +134,12 @@ def job_candidates_api(request, job_id):
     data = []
     for c in candidates:
         data.append({
+            "id": c.id,
             "name": c.name,
             "email": c.email,
             "score": c.match_score,
-            "status": c.status
+            "status": c.status.replace("_", " ").title(),
+            "link": c.resume_file.url if c.resume_file else ""
         })
 
     return JsonResponse(data, safe=False)
@@ -153,7 +155,7 @@ def candidate_detail_api(request, id):
         "phone": c.phone,
 
         # Status + score
-        "status": c.status,
+        "status": c.status.replace("_", " ").title(),
         "score": c.match_score,
         "summary": c.summary,
 
@@ -219,7 +221,7 @@ def screen_single(request, job_id, id):
 
     candidate.experience = result.experience_years
     candidate.summary = result.reasoning
-    candidate.match_score = result.match_score
+    candidate.match_score = result.match_score * 100
     candidate.recommendation = result.recommendation
     candidate.is_screened = True
 
