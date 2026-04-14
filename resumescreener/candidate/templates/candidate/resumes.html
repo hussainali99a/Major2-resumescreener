@@ -1,4 +1,4 @@
-{% extends "recruiter/base.html" %}
+{% extends "candidate/base.html" %}
 {% block content %}
 
 <main class="flex-1 p-8">
@@ -62,18 +62,7 @@
     <button onclick="applyFilter('not_screened')" class="filter-btn">Unscreened</button>
   </div>
 
-
-  <!-- ACTION -->
-  {% if selected_job %}
-  <div class="flex gap-3 mb-6">
-    <a href="{% url 'screen_all' selected_job %}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">
-      🤖 Screen All
-    </a>
-  </div>
-  {% endif %}
-
   <!-- STATES -->
-
   {% if not selected_job %}
   <div class="bg-white p-10 rounded-xl shadow text-center">
     <h2 class="text-xl font-semibold">Select a Job</h2>
@@ -92,7 +81,6 @@
 
   <!-- GRID -->
   <section id="candidateGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
     {% for c in candidates %}
     <div class="candidate-card bg-white p-5 rounded-xl shadow cursor-pointer" data-status="{{ c.status|lower }}"
       onclick="openCandidateDrawer('{{ c.id }}')">

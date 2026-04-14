@@ -2,10 +2,8 @@ from django.urls import path
 from candidate import views
 
 urlpatterns = [
-    # path('jobs/', views.jobs_view, name='jobs'),
-    # path('candidates/', views.candidates_view, name='candidates'),
-    # path('candidate/<int:id>/', views.candidate_detail_api),
-    # path('jobs/<int:id>/', views.job_detail_api),
-
-    # path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/', views.dashboard, name='candidate-dashboard'),
+    path('jobs/', views.jobs_view, name='candidate-jobs'),
+    path('jobs/<int:job_id>/resumes/', views.resumes_view, name='candidate-resumes'),
+    path('jobs/<int:job_id>/screen/<int:id>/', views.screen_single, name='candidate-screen_single'),
 ]
