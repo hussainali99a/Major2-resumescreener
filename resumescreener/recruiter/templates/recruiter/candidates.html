@@ -220,7 +220,7 @@
 
     <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
-      <input type="file" name="resume" class="mb-4 w-full" required>
+      <input type="file" name="resume" class="mb-4 w-full" multiple required>
 
       <div class="flex justify-end gap-2">
         <button type="button" onclick="closeUploadModal()" class="bg-gray-300 px-3 py-1 rounded">
