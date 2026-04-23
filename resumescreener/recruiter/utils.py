@@ -15,3 +15,13 @@ def extract_text_from_resume(file):
         return text, extract_email(text)
     except:
         return "unknown", "unknown"
+
+def extract_jd_text(file):
+    try:
+        reader = PyPDF2.PdfReader(file)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() or ""
+        return text
+    except:
+        return "unknown"

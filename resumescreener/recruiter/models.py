@@ -1,13 +1,21 @@
 from django.db import models
 from accounts.models import User
 
+
 class Job(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,default=None)
     title = models.CharField(max_length=255)
-    description = models.TextField()
     profile = models.CharField(max_length=255)
+
+    description = models.TextField(blank=True)  # manual JD
+    jd_file = models.FileField(upload_to='job_descriptions/', blank=True, null=True)
+    jd_text = models.TextField(blank=True)  # parsed text from PDF
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def get_effective_jd(self):
+        return self.jd_text if self.jd_text else self.description
+    
     def __str__(self):
         return self.title
 

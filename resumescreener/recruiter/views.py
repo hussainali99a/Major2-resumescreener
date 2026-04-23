@@ -4,7 +4,7 @@ from recruiter.models import Job, Candidate, User
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
-from recruiter.utils import extract_text_from_resume
+from recruiter.utils import extract_text_from_resume, extract_jd_text
 import hashlib
 
 # ----------------------
@@ -34,12 +34,23 @@ def jobs_view(request):
         title = request.POST.get('title')
         profile = request.POST.get('profile')
         description = request.POST.get('description')
+        jd_file = request.FILES.get('jd_file')
+        print("FILES:", request.FILES)
+        print("JD FILE:", request.FILES.get('jd_file'))
+        print("Received JD file:", jd_file)
+
+        jd_text = ""
+
+        if jd_file:
+            jd_text = extract_jd_text(jd_file)
 
         Job.objects.create(
             title=title,
             profile=profile,
             description=description,
-            user=request.user  # 👈 IMPORTANT
+            jd_file=jd_file,
+            jd_text=jd_text,
+            user=request.user
         )
 
         return redirect('jobs')
@@ -203,7 +214,7 @@ def screen_single(request, job_id, id):
 
     result = run_resume_screening(
         candidate.resume_text,
-        job.description
+        job.get_effective_jd()
     )
 
     candidate.name = result.name or candidate.name
@@ -236,14 +247,51 @@ def screen_single(request, job_id, id):
 
     return redirect(f"/hr/jobs/{job_id}/candidates/")
 
+
 @login_required
 def screen_all(request, job_id):
-    candidates = Candidate.objects.filter(match_score=0, job_id=job_id)
 
-    for c in candidates:
-        c.match_score = 75
-        c.summary = "Auto screened"
-        c.status = "UNDER_REVIEW"
-        c.save()
+    job = Job.objects.get(id=job_id)
+    job_text = job.get_effective_jd()
+
+    candidates = Candidate.objects.filter(
+        job_id=job_id,
+        is_screened=False
+    )
+
+    for candidate in candidates:
+        try:
+            result = run_resume_screening(candidate.resume_text, job_text)
+
+            candidate.name = result.name or candidate.name
+            candidate.email = result.email or candidate.email
+            candidate.phone = result.phone or candidate.phone
+            candidate.linkedin = result.linkedin
+            candidate.github = result.github
+            candidate.portfolio = result.portfolio
+
+            candidate.extracted_skills = result.all_skills
+            candidate.demonstrated_skills = result.demonstrated_skills
+            candidate.listed_skills_only = result.listed_skills_only
+            candidate.strengths = result.strengths
+            candidate.gaps = result.gaps
+
+            candidate.experience = result.experience_years
+            candidate.summary = result.reasoning
+            candidate.match_score = result.match_score * 100
+            candidate.recommendation = result.recommendation
+            candidate.is_screened = True
+
+            if result.recommendation == "ACCEPT":
+                candidate.status = "ACCEPTED"
+            elif result.recommendation == "REJECT":
+                candidate.status = "REJECTED"
+            else:
+                candidate.status = "UNDER_REVIEW"
+
+            candidate.save()
+
+        except Exception as e:
+            print("Screen error:", e)
 
     return redirect(f"/hr/jobs/{job_id}/candidates/")

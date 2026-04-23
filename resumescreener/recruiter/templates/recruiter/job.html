@@ -82,15 +82,16 @@
 
     <h2 class="text-xl font-semibold mb-4">Create Job</h2>
 
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
 
       <input type="text" name="title" placeholder="Job Title" class="w-full p-3 mb-3 border rounded-lg" required>
 
       <input type="text" name="profile" placeholder="Job Profile" class="w-full p-3 mb-3 border rounded-lg" required>
+      <input type="file" name="jd_file" class="w-full p-3 mb-3 border rounded-lg" accept=".pdf">
 
       <textarea name="description" placeholder="Job Description" class="w-full p-3 mb-3 border rounded-lg" rows="4"
-        required></textarea>
+        ></textarea>
 
       <div class="flex justify-end gap-2">
         <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
