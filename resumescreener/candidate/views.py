@@ -9,8 +9,8 @@ import hashlib
 
 @login_required(login_url='login')
 def dashboard(request):
-    jobs = Job.objects.all().order_by('-created_at')
-    candidates = Candidate.objects.all().order_by('-created_at')
+    jobs = Job.objects.filter(user=request.user, job_type="individual").order_by('-created_at')
+    candidates = Candidate.objects.filter(user=request.user, job__job_type="individual").order_by('-created_at')
 
     context = {
         'jobs_count': jobs.count(),
@@ -38,12 +38,12 @@ def jobs_view(request):
             user=request.user  # 👈 IMPORTANT
         )
 
-        return redirect('jobs')
+        return redirect('candidate-jobs')
 
 
     # SEARCH
     query = request.GET.get('q', '')
-    jobs = Job.objects.filter(user=request.user)
+    jobs = Job.objects.filter(user=request.user, job_type="individual")
 
     if query:
         jobs = jobs.filter(
@@ -68,7 +68,7 @@ def jobs_view(request):
 
 @login_required
 def resumes_view(request, job_id=None):
-    jobs = Job.objects.filter(user=request.user)
+    jobs = Job.objects.filter(user=request.user, job_type="individual").order_by('-created_at')
     candidates = Candidate.objects.none()
 
     if job_id:
@@ -113,7 +113,6 @@ def resumes_view(request, job_id=None):
 
         return redirect(f'/jobs/{job_id}/resumes/')
 
-    jobs = Job.objects.filter(user=request.user)
     return render(request, 'candidate/resumes.html', {
         'jobs': jobs,
         'candidates': candidates,
@@ -164,17 +163,5 @@ def screen_single(request, job_id, id):
         candidate.status = "UNDER_REVIEW"
 
     candidate.save()
-
-    return redirect(f"jobs/{job_id}/resumes/")
-
-@login_required
-def screen_all(request, job_id):
-    candidates = Candidate.objects.filter(match_score=0, job_id=job_id)
-
-    for c in candidates:
-        c.match_score = 75
-        c.summary = "Auto screened"
-        c.status = "UNDER_REVIEW"
-        c.save()
 
     return redirect(f"jobs/{job_id}/resumes/")

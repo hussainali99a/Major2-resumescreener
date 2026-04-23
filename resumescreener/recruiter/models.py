@@ -9,6 +9,8 @@ class Job(models.Model):
     description = models.TextField(blank=True)  # manual JD
     jd_file = models.FileField(upload_to='job_descriptions/', blank=True, null=True)
     jd_text = models.TextField(blank=True)  # parsed text from PDF
+    job_type = models.CharField(max_length=20, default="individual")
+    query = models.TextField(default="")  # for storing LLM prompt/query if needed
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

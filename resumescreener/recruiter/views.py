@@ -13,8 +13,8 @@ import hashlib
 
 @login_required(login_url='login')
 def dashboard(request):
-    jobs = Job.objects.all().order_by('-created_at')
-    candidates = Candidate.objects.all().order_by('-created_at')
+    jobs = Job.objects.filter(user=request.user, job_type="hr").order_by('-created_at')
+    candidates = Candidate.objects.filter(job__user=request.user, job__job_type="hr").order_by('-created_at')
 
     context = {
         'jobs_count': jobs.count(),
@@ -50,7 +50,8 @@ def jobs_view(request):
             description=description,
             jd_file=jd_file,
             jd_text=jd_text,
-            user=request.user
+            user=request.user,
+            job_type="hr"
         )
 
         return redirect('jobs')
@@ -58,7 +59,7 @@ def jobs_view(request):
 
     # SEARCH
     query = request.GET.get('q', '')
-    jobs = Job.objects.filter(user=request.user)
+    jobs = Job.objects.filter(user=request.user, job_type="hr")
 
     if query:
         jobs = jobs.filter(
@@ -83,7 +84,7 @@ def jobs_view(request):
 
 @login_required
 def candidates_view(request, job_id=None):
-    jobs = Job.objects.filter(user=request.user)
+    jobs = Job.objects.filter(user=request.user, job_type="hr").order_by('-created_at')
     candidates = Candidate.objects.none()
 
     if job_id:
@@ -96,39 +97,45 @@ def candidates_view(request, job_id=None):
     
     # ================= UPLOAD =================
     if request.method == "POST":
-        resume = request.FILES.get('resume')
+        resumes = request.FILES.getlist('resume')  # 👈 key change
 
-        if not resume or not job_id:
+        if not resumes or not job_id:
             return redirect(f'/hr/jobs/{job_id}/candidates/')
 
-        # 🔐 hash file (avoid duplicates)
-        file_hash = hashlib.sha256(resume.read()).hexdigest()
-        resume.seek(0)
+        for resume in resumes:
+            try:
+                # 🔐 hash file (avoid duplicates)
+                file_hash = hashlib.sha256(resume.read()).hexdigest()
+                resume.seek(0)
 
-        if Candidate.objects.filter(file_hash=file_hash, job_id=job_id).exists():
-            return redirect(f'/hr/jobs/{job_id}/candidates/')
+                if Candidate.objects.filter(file_hash=file_hash, job_id=job_id).exists():
+                    continue  # skip duplicate, don't break flow
 
-        # 🧠 Extract text (basic version)
-        resume_text, email = extract_text_from_resume(resume)  # create this
+                # 🧠 Extract text
+                resume_text, email = extract_text_from_resume(resume)
 
-        # 🧠 Dummy parsing (replace later with AI)
-        name = resume_text.split('\n')[0] if resume_text else "Unknown"
+                name = resume_text.split('\n')[0] if resume_text else "Unknown"
 
-        Candidate.objects.create(
-            user=request.user,
-            job_id=job_id,
-            name=name,
-            email=email,
-            resume_file=resume,
-            file_hash=file_hash,
-            resume_text=resume_text,
-            match_score=0,
-            summary="Pending AI screening",
-        )
+                Candidate.objects.create(
+                    user=request.user,
+                    job_id=job_id,
+                    name=name,
+                    email=email,
+                    resume_file=resume,
+                    file_hash=file_hash,
+                    resume_text=resume_text,
+                    match_score=0,
+                    summary="Pending AI screening",
+                )
+
+            except Exception as e:
+                # optional: log error
+                print(f"Error processing resume: {e}")
+                continue
 
         return redirect(f'/hr/jobs/{job_id}/candidates/')
 
-    jobs = Job.objects.filter(user=request.user)
+    jobs = Job.objects.filter(user=request.user, job_type="hr").order_by('-created_at')
     return render(request, 'recruiter/candidates.html', {
         'jobs': jobs,
         'candidates': candidates,
