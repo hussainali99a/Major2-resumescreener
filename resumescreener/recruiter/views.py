@@ -205,7 +205,7 @@ def job_detail_api(request, job_id):
     return JsonResponse({
         "title": job.title,
         "profile": job.profile,
-        "description": job.description,
+        "description": job.get_effective_jd(),
         "created_at": job.created_at.isoformat()
     })
 
